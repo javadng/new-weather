@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-size: 62.5%;
+}
+
+@media only screen and (max-width: 600px) {
+  html {
+    font-size: 50%;
+  }
+
+  body {
+    font-size: 1.8rem;
+  }
+}
+
+body {
+  height: 100vh;
+  background-image: linear-gradient(rgb(17, 24, 39), rgb(75, 85, 99));
+  font-size: 2rem;
+}

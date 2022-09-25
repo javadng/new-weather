@@ -1,0 +1,9 @@
+.Active span {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+span.opacity-0 {
+  visibility: hidden;
+  font-size: 1.5rem;
+  transition: all 0.3s;
+}
