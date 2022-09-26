@@ -32,7 +32,9 @@ const Favorite = props => {
 
   return (
     <Main>
-      <div className="grid grid-cols-2 gap-0 pb-10">{favoriteContent}</div>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(20rem,_1fr))] gap-0 pb-10">
+        {favoriteContent}
+      </div>
     </Main>
   );
 };
