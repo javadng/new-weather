@@ -1,3 +1,0 @@
-API key : 6f34485c30594e1e81d93658222208 
-
-https://www.weatherapi.com/docs/
