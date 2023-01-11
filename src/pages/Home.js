@@ -11,14 +11,14 @@ import Search from '../components/Search';
 import convertTime from '../lib/timeConverter';
 
 const Home = props => {
-  const { weatherData, favCities, setFavCities } = useContext(WeatherContext);
+  const { weatherData, favCities, setFavCities, httpStatus } =
+    useContext(WeatherContext);
 
   const isCityInFavArray = favCities?.find(
     item => item.location?.city === weatherData.location?.city
   );
 
   const toggleFavHandler = () => {
-    console.log('clicked');
     if (isCityInFavArray) {
       const newfavCities = favCities.filter(
         city => city.location.city !== weatherData.location.city
@@ -40,8 +40,8 @@ const Home = props => {
 
   return (
     <Main>
-      {weatherData.status === 'LOADING' && <Spinner />}
-      {weatherData.status === 'SUCCESS' && (
+      {httpStatus === 'LOADING' && <Spinner />}
+      {httpStatus === 'SUCCESS' && weatherData.current && (
         <div className="weather text-center">
           <div className="search">
             <Search />
@@ -82,9 +82,9 @@ const Home = props => {
                 className="object-cover m-auto h-full"
                 alt={weatherData.current.weather[0].description}
               />
-            <span className="rounded-3xl shadow-md shadow-slate-700 bg-gray-800 px-8 py-2 mb-10 inline-block">
-              {weatherData.current.weather[0].description}
-            </span>
+              <span className="rounded-3xl shadow-md shadow-slate-700 bg-gray-800 px-8 py-2 mb-10 inline-block">
+                {weatherData.current.weather[0].description}
+              </span>
             </figure>
             <h1 className="text-[9rem] mb-10">
               {Math.ceil(weatherData.current.temp)}
@@ -108,7 +108,7 @@ const Home = props => {
               )}
             </div>
           </div>
-          <div className="flex justify-between w-3/4 m-auto md:mt-10" >
+          <div className="flex justify-between w-3/4 m-auto md:mt-10">
             <div className="flex flex-wrap justify-between w-4/5 m-auto mb-10 text-2xl">
               <div className="flex items-center mb-3">
                 <WiHumidity size="3.5rem" />

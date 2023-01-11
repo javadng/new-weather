@@ -52,7 +52,7 @@ const useHttp = requestFunc => {
         dispatch({ type: 'ERROR', error: err.message });
       }
     },
-    [requestFunc]
+    [requestFunc, TIMEOUT_SEC]
   );
 
   return [sendRequest, httpState];

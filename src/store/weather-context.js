@@ -6,6 +6,7 @@ const WeatherContext = React.createContext({
   location: {},
   favCities: [],
   Notification: null,
+  httpStatus: null,
   setFavCity: city => {},
 });
 

@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { API_REVERSEGOE } from '../config/config';
 import useHttp from '../hooks/use-http';
-import getDataO from '../lib/getDatao';
+import getData from '../lib/getData';
 import WeatherContext from './weather-context';
 
 const WeatherProvider = props => {
-  const [sendRequest, httpState] = useHttp(getDataO);
+  const [sendRequest, httpState] = useHttp(getData);
   const [weatherData, setWeatherData] = useState({});
   const [favCities, setFavCities] = useState([]);
   const [notification, setNotification] = useState({
@@ -14,14 +13,25 @@ const WeatherProvider = props => {
   });
 
   const failGeo = async () => {
-    console.error("we can't access to your location");
-
     setNotification({
       type: 'ERROR',
       message: "we can't access to your location",
     });
-
     sendRequest('lat=32.653897&lon=51.665966');
+  };
+
+  const successGeo = async position => {
+    try {
+      const { latitude, longitude } = position.coords;
+
+      await sendRequest(`lat=${latitude}&lon=${longitude}`);
+    } catch (error) {
+      console.log(`💥💥 ${error}`);
+      setNotification({
+        type: 'ERROR',
+        message: error.message || 'Somthing went wrong.',
+      });
+    }
   };
 
   useEffect(() => {
@@ -29,22 +39,17 @@ const WeatherProvider = props => {
   }, []);
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(async position => {
-      try {
-        const { latitude, longitude } = position.coords;
+    let isSendigRequest = true;
+    if (isSendigRequest) {
+      navigator.geolocation.getCurrentPosition(successGeo, failGeo);
+    }
 
-        await sendRequest(`lat=${latitude}&lon=${longitude}`);
-      } catch (error) {
-        console.log(`💥💥 ${error}`);
+    return () => {
+      isSendigRequest = false;
+    };
+  }, [navigator]);
 
-        setNotification({
-          type: 'ERROR',
-          message: error,
-        });
-      }
-    }, failGeo);
-  }, [API_REVERSEGOE, sendRequest]);
-
+  // format data
   useEffect(() => {
     if (httpState.status === 'SUCCESS') {
       setWeatherData({
@@ -55,17 +60,16 @@ const WeatherProvider = props => {
           city: httpState.data.geo.city,
           suburb: httpState.data.geo.suburb,
         },
-        status: httpState.status,
       });
     }
-
+    // set error notification
     if (httpState.error) {
       setNotification({
         type: 'ERROR',
         message: httpState.error,
       });
     }
-  }, [httpState, setWeatherData, setNotification]);
+  }, [setNotification, setWeatherData, httpState]);
 
   return (
     <WeatherContext.Provider
@@ -76,6 +80,7 @@ const WeatherProvider = props => {
         setFavCities,
         setNotification,
         notification,
+        httpStatus: httpState.status,
       }}
     >
       {props.children}

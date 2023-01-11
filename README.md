@@ -2,7 +2,7 @@
 
 ## VPN ON
 
-Search with city, region name (Support Persion , English... )
+Search with city, region name (Support Persian , English... )
 Single Page Application SPA
 Responsive
 React-router-dom

@@ -3,25 +3,25 @@ import { WiHumidity, WiSandstorm } from 'react-icons/wi';
 import { useContext, useEffect } from 'react';
 import WeatherContext from '../store/weather-context';
 import Spinner from './UI/Spinner';
-
 import { useNavigate } from 'react-router-dom';
-import useSearch from '../hooks/useSearch';
+import useHttp from '../hooks/use-http';
+import searchAPI from '../lib/searchAPI';
 
 const FavItem = props => {
   const navigate = useNavigate();
 
   const { setWeatherData, setNotification } = useContext(WeatherContext);
-  const { searchAJAX, searchError, httpState } = useSearch();
+  const [sendRequest, httpState] = useHttp(searchAPI);
 
-  const cityNameReqHandler = async () => {
+  const cityNameReqHandler = () => {
     setNotification({
       type: null,
       message: null,
     });
 
-    await searchAJAX(props.city);
+    sendRequest(props.city);
 
-    if (searchError) {
+    if (httpState.error) {
       setNotification({
         type: 'ERROR',
         message: searchError,
@@ -32,27 +32,47 @@ const FavItem = props => {
   };
 
   useEffect(() => {
-    if (httpState.status === 'SUCCESS') {
-      setWeatherData({
-        current: httpState.data.weather.current,
-        forecast: httpState.data.weather.daily,
-        location: {
-          country: httpState.data.geo.country,
-          city: httpState.data.geo.city || httpState.data.geo.county,
-          suburb: httpState.data.geo.suburb || httpState.data.geo.county,
-        },
-        status: httpState.status,
-      });
+    let isAllowed = true;
 
+    if (isAllowed && httpState.status === 'SUCCESS') {
+      setWeatherData({
+        current: httpState.data.weatherData.current,
+        forecast: httpState.data.weatherData.daily,
+        location: {
+          country: httpState.data.location.country,
+          city: httpState.data.location.city,
+          suburb: httpState.data.location.suburb,
+        },
+      });
 
       navigate('/');
     }
+
+    return () => {
+      isAllowed = false;
+    };
   }, [httpState, setWeatherData]);
+
+  // useEffect(() => {
+  //   if (httpState.status === 'SUCCESS') {
+  //     setWeatherData({
+  //       current: httpState.data.weather.current,
+  //       forecast: httpState.data.weather.daily,
+  //       location: {
+  //         country: httpState.data.geo.country,
+  //         city: httpState.data.geo.city || httpState.data.geo.county,
+  //         suburb: httpState.data.geo.suburb || httpState.data.geo.county,
+  //       },
+  //     });
+
+  //     navigate('/');
+  //   }
+  // }, [httpState, setWeatherData]);
 
   return (
     <div
       onClick={cityNameReqHandler}
-      className="city-fav-item bg-slate-800 text-gray-300 rounded-xl p-5 m-3 grid gap-3 grid-rows-[repeat(3,_minmax(50px,70px))]"
+      className="city-fav-item cursor-pointer bg-slate-800 text-gray-300 rounded-xl p-5 m-3 grid gap-3 grid-rows-[repeat(3,_minmax(50px,70px))]"
     >
       {httpState.status === 'LOADING' && <Spinner />}
       <span className="text-6xl">

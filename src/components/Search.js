@@ -2,13 +2,14 @@ import { useContext, useEffect, useRef, useState } from 'react';
 
 import Spinner from '../components/UI/Spinner';
 import WeatherContext from '../store/weather-context';
-import useSearch from '../hooks/useSearch';
+import useHttp from '../hooks/use-http';
+import searchAPI from '../lib/searchAPI';
 
 const Search = props => {
   const searchInputRef = useRef();
   const [searchInput, setSearchInput] = useState('');
 
-  const { searchAJAX, searchError, searchIsLoading, httpState } = useSearch();
+  const [sendRequest, httpState] = useHttp(searchAPI);
 
   const { setNotification, setWeatherData } = useContext(WeatherContext);
 
@@ -18,7 +19,6 @@ const Search = props => {
 
   const SubmitHandler = async e => {
     e.preventDefault();
-
     // Guard
     if (searchInput.trim().length < 3) return;
 
@@ -28,40 +28,36 @@ const Search = props => {
       message: null,
     });
 
-    await searchAJAX(searchInput);
-
-    if (searchError) {
+    sendRequest(searchInput);
+    if (httpState.error) {
       setNotification({
         type: 'ERROR',
-        message: searchError,
+        message: httpState.error,
       });
-
       return;
     }
 
     setSearchInput('');
-
     searchInputRef.current.blur();
   };
 
   useEffect(() => {
     if (httpState.status === 'SUCCESS') {
       setWeatherData({
-        current: httpState.data.weather.current,
-        forecast: httpState.data.weather.daily,
+        current: httpState.data.weatherData.current,
+        forecast: httpState.data.weatherData.daily,
         location: {
-          country: httpState.data.geo.country,
-          city: httpState.data.geo.city,
-          suburb: httpState.data.geo.suburb,
+          country: httpState.data.location.country,
+          city: httpState.data.location.city,
+          suburb: httpState.data.location.suburb,
         },
-        status: httpState.status,
       });
     }
   }, [httpState, setWeatherData]);
 
   return (
     <form onSubmit={SubmitHandler} className="col-span-full mb-5 text-center">
-      {searchIsLoading && <Spinner />}
+      {httpState.status === 'LOADING' && <Spinner />}
       <input
         placeholder="Search..."
         ref={searchInputRef}
