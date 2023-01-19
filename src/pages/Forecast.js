@@ -15,11 +15,11 @@ import convertTime from '../lib/timeConverter';
 const Forecast = props => {
   const { weatherData } = useContext(WeatherContext);
 
-  const { forecast, location, status, current } = weatherData;
+  const { forecast, location, current } = weatherData;
   return (
     <Main>
-      {status === 'LOADING' && <Spinner />}
-      {status === 'SUCCESS' && (
+      {!current && <Spinner />}
+      {current && (
         <Fragment>
           <div className="grid grid-cols-2 gap-10">
             <div className="col-start-1 text-center text-gray-300">
